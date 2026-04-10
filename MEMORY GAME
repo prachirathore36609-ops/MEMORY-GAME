@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Memory Color Challenge</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #e6e0f8, #f5f0ff);
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #4b3f72;
+    }
+
+    #info {
+      margin: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    #gameBoard {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      background: #d6ccf2;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+    }
+
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+
+    .card-inner {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      backface-visibility: hidden;
+    }
+
+    .front {
+      background: #b9a7e6;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
+    #startBtn {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: #7b6cf6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #startBtn:hover {
+      background: #5a4fd6;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🧠 Memory Color Challenge</h1>
+<div id="info">Score: 0 | Time: 30</div>
+
+<div id="gameBoard"></div>
+
+<button id="startBtn" onclick="startGame()">Start Game</button>
+
+<script>
+const colors = ["#ff6b6b","#6bcBef","#ffd93d","#6bff95","#c77dff","#ff9f1c","#4ecdc4","#f72585"];
+let cards = [];
+let flipped = [];
+let score = 0;
+let time = 30;
+let timer;
+
+function startGame() {
+  score = 0;
+  time = 30;
+  flipped = [];
+  clearInterval(timer);
+  generateCards();
+  updateInfo();
+
+  timer = setInterval(() => {
+    time--;
+    updateInfo();
+    if (time === 0) {
+      clearInterval(timer);
+      alert("Game Over! Score: " + score);
+    }
+  }, 1000);
+}
+
+function generateCards() {
+  const board = document.getElementById("gameBoard");
+  board.innerHTML = "";
+
+  let doubled = [...colors, ...colors].sort(() => 0.5 - Math.random());
+
+  doubled.forEach(color => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const front = document.createElement("div");
+    front.className = "card-inner front";
+
+    const back = document.createElement("div");
+    back.className = "card-inner back";
+    back.style.background = color;
+
+    card.appendChild(front);
+    card.appendChild(back);
+
+    card.onclick = () => flipCard(card, color);
+
+    board.appendChild(card);
+  });
+}
+
+function flipCard(card, color) {
+  if (flipped.length < 2 && !card.classList.contains("flip")) {
+    card.classList.add("flip");
+    flipped.push({card, color});
+
+    if (flipped.length === 2) {
+      setTimeout(checkMatch, 600);
+    }
+  }
+}
+
+function checkMatch() {
+  if (flipped[0].color === flipped[1].color) {
+    score++;
+  } else {
+    flipped[0].card.classList.remove("flip");
+    flipped[1].card.classList.remove("flip");
+  }
+  flipped = [];
+  updateInfo();
+}
+
+function updateInfo() {
+  document.getElementById("info").innerText =
+    "Score: " + score + " | Time: " + time;
+}
+</script>
+
+</body>
+</html>
